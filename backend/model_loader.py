@@ -199,12 +199,14 @@ def load_model():
         remapped_sd[new_k] = v
 
     missing, unexpected = _model.load_state_dict(remapped_sd, strict=False)
-    if missing:
-        print(f"[model_loader] WARN: Claves faltantes ({len(missing)}): {missing[:5]}")
-    if unexpected:
-        print(f"[model_loader] WARN: Claves inesperadas ({len(unexpected)}): {unexpected[:5]}")
-    if not missing and not unexpected:
-        print("[model_loader] State dict cargado sin discrepancias.")
+    if missing or unexpected:
+        raise RuntimeError(
+            f"[model_loader] State dict no coincide con la arquitectura "
+            f"(posible mismatch de versión de sentence-transformers/torch): "
+            f"{len(missing)} claves faltantes {missing[:5]}, "
+            f"{len(unexpected)} claves inesperadas {unexpected[:5]}"
+        )
+    print("[model_loader] State dict cargado sin discrepancias.")
 
     _model.eval()
 
